@@ -1,5 +1,4 @@
 using DatingAppProject.DTO;
-using DatingAppProject.Entities.InterestEntity;
 using DatingAppProject.Exceptions;
 using DatingAppProject.Repositories.InterestRepository;
 using Microsoft.AspNetCore.Mvc;
@@ -16,8 +15,14 @@ public class InterestController(IInterestRepository interestRepository) : Contro
         return Ok(interests);
     }
 
-    [HttpPost]
+    [HttpPost("create")]
+    // [Authorize(Policy = "RequireAdminRole")]
     public async Task<ActionResult> CreateInterest(InterestRequestDto interestRequest){
+        Console.WriteLine("User Claims: ");
+        foreach (var claim in User.Claims) {
+            Console.WriteLine(claim.Type + ": " + claim.Value);
+        }
+        
         try {
             await interestRepository.SaveInterest(interestRequest);
 
@@ -27,11 +32,8 @@ public class InterestController(IInterestRepository interestRepository) : Contro
 
             return BadRequest("Cannot create interest.");
         }
-        catch (InterestException interestException) {
-            return BadRequest(new { message = interestException.Message });
-        }
         catch (Exception exception) {
-            return StatusCode(500, new { message = "An unexpected error has occurred. Please try again later." });
+            return BadRequest(new ApiException(BadRequest().StatusCode, exception.Message, exception.StackTrace));
         }
     }
 }

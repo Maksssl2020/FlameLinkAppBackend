@@ -13,11 +13,11 @@ public class InterestRepository(DataContext dataContext, IMapper mapper) : IInte
     public async Task SaveInterest(InterestRequestDto interestRequest){
 
         if (interestRequest.InterestName.IsNullOrEmpty()) {
-            throw new InterestException("Invalid interest name.");
+            throw new Exception("Invalid interest name.");
         }
         
         if (!await IsInterestAvailable(interestRequest.InterestName)) {
-            throw new InterestException("Interest not available.");
+            throw new Exception("Interest not available.");
         }
         
         var interest = new Interest {
@@ -34,7 +34,7 @@ public class InterestRepository(DataContext dataContext, IMapper mapper) : IInte
     }
 
     public async Task<bool> IsInterestAvailable(string interestName){
-        return await dataContext.Interests.AnyAsync(interest => interest.InterestName == interestName);
+        return !await dataContext.Interests.AnyAsync(interest => interest.InterestName == interestName);
     }
 
     public async Task<bool> SaveChanges(){

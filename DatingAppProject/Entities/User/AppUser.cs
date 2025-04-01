@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace DatingAppProject.Entities;
+namespace DatingAppProject.Entities.User;
 
 public class AppUser : IdentityUser<long> {
     

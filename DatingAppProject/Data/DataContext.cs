@@ -1,5 +1,6 @@
 using DatingAppProject.Entities;
 using DatingAppProject.Entities.InterestEntity;
+using DatingAppProject.Entities.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

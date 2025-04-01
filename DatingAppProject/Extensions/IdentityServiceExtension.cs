@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using System.Text;
 using DatingAppProject.Data;
 using DatingAppProject.Entities;
+using DatingAppProject.Entities.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -23,8 +25,9 @@ public static class IdentityServiceExtension {
             options.TokenValidationParameters = new TokenValidationParameters {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSecret)),
-                ValidateIssuer = true,
-                ValidateAudience = true,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                RoleClaimType = ClaimTypes.Role
             };
         });
         

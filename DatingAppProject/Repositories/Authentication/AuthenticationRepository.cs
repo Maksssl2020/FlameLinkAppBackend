@@ -1,8 +1,9 @@
 using System.Security.Authentication;
 using AutoMapper;
-using DatingAppProject.Data;
 using DatingAppProject.DTO;
 using DatingAppProject.Entities;
+using DatingAppProject.Entities.User;
+using DatingAppProject.Exceptions;
 using DatingAppProject.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,20 +14,19 @@ public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenSe
     
     public async Task<AuthenticationDto> Register(RegisterRequestDto registerRequest){
         if (await IsFieldTaken("username", registerRequest.Username)) {
-            throw new AuthenticationException("Username already taken.");
-        }
-
-        if (await IsFieldTaken("email", registerRequest.Email)) {
-            throw new AuthenticationException("Email already taken.");
+            throw new CustomAuthenticationException("Username already taken.");
         }
         
+        if (await IsFieldTaken("email", registerRequest.Email)) {
+            throw new CustomAuthenticationException("Email already taken.");
+        }
+
         var appUser = mapper.Map<AppUser>(registerRequest);
         var result = await userManager.CreateAsync(appUser, registerRequest.Password);
         
-        
         if (!result.Succeeded) {
             var errors = string.Join(",", result.Errors.Select(e => e.Description));
-            throw new AuthenticationException($"Registration failed: {errors}");
+            throw new CustomAuthenticationException($"Registration failed: {errors}");
         }
         
         var roleResult = await userManager.AddToRoleAsync(appUser, "User");
@@ -37,7 +37,7 @@ public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenSe
             });
         {
             var errors = string.Join(",", roleResult.Errors.Select(e => e.Description));
-            throw new AuthenticationException($"Registration failed: {errors}");
+            throw new CustomAuthenticationException($"Registration failed: {errors}");
         }
 
     }
@@ -59,7 +59,7 @@ public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenSe
         
         if (!result.Succeeded) {
             var errors = string.Join(",", result.Errors.Select(e => e.Description));
-            throw new AuthenticationException($"Registration failed: {errors}");
+            throw new CustomAuthenticationException($"Registration failed: {errors}");
         }
         
         await userManager.AddToRoleAsync(appUser, "Admin");
@@ -70,18 +70,22 @@ public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenSe
             .FirstOrDefaultAsync(user => user.UserName == loginRequest.Username);
 
         if (foundUser?.UserName == null || !await userManager.CheckPasswordAsync(foundUser, loginRequest.Password)) {
-            throw new AuthenticationException("Invalid credentials.");
+            throw new CustomAuthenticationException("Invalid credentials.");
         }
 
+        var userRoles = await userManager.GetRolesAsync(foundUser);
+        
         return new AuthenticationDto {
             UserId = foundUser.Id,
             Username = foundUser.UserName,
             Email = foundUser.Email,
-            AccessToken = await tokenService.GenerateToken(foundUser)
+            AccessToken = await tokenService.GenerateToken(foundUser),
+            Roles = userRoles
         };
     }
     
     public async Task<bool> IsFieldTaken(string field, string value){
+        Console.WriteLine($"Checking if {field} with value {value} is taken.");
         return field switch {
             "username" => await userManager.Users.AnyAsync(user => user.UserName == value),
             "email" => await userManager.Users.AnyAsync(user => user.Email == value),

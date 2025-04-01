@@ -15,11 +15,12 @@ public class AuthenticationController(IAuthenticationRepository authenticationRe
             var registrationResult = await authenticationRepository.Register(registerRequest);
             return Ok(registrationResult);
         }
-        catch (AuthenticationException exception) {
-            return BadRequest(new { message = exception.Message });
-        }
         catch (Exception exception) {
-            return StatusCode(500, new { message = "An unexpected error has occurred. Please try again later." });
+            if (exception is CustomAuthenticationException authenticationException) {
+                return BadRequest(new ApiException(BadRequest().StatusCode, authenticationException.Message, exception.StackTrace));
+            }
+            
+            return BadRequest(new ApiException(BadRequest().StatusCode, "Something went wrong. Please try again later.", exception.Message));
         }
     }
 
@@ -35,11 +36,8 @@ public class AuthenticationController(IAuthenticationRepository authenticationRe
             var loginResult = await authenticationRepository.Login(loginRequest);
             return Ok(loginResult);
         }
-        catch (AuthenticationException authenticationException) {
-            return BadRequest(new { message = authenticationException.Message });
-        }
         catch (Exception exception) {
-            return StatusCode(500, new { message = "An unexpected error has occurred. Please try again later." });
+            return BadRequest(new ApiException(BadRequest().StatusCode, exception.Message, exception.StackTrace));
         }
     }
 }

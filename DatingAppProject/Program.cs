@@ -1,5 +1,6 @@
 using DatingAppProject.Data;
 using DatingAppProject.Entities;
+using DatingAppProject.Entities.User;
 using DatingAppProject.extensions;
 using DatingAppProject.Middleware;
 using Microsoft.AspNetCore.Identity;
@@ -19,9 +20,9 @@ public class Program {
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173"));
         
-        app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseHttpsRedirection();
         
         app.MapControllers();
         
