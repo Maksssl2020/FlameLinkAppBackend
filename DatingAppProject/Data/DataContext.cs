@@ -1,5 +1,7 @@
 using DatingAppProject.Entities;
+using DatingAppProject.Entities.ImageEntity;
 using DatingAppProject.Entities.InterestEntity;
+using DatingAppProject.Entities.NewsEntity;
 using DatingAppProject.Entities.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -13,6 +15,8 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<
     IdentityUserToken<long>
 >(options) {
     public DbSet<Interest> Interests { get; set; }
+    public DbSet<Image> Images { get; set; }
+    public DbSet<News> News { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder){
         base.OnModelCreating(builder);

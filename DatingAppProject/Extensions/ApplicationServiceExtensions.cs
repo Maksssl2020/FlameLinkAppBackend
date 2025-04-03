@@ -1,6 +1,8 @@
 using DatingAppProject.Data;
 using DatingAppProject.Repositories.Authentication;
+using DatingAppProject.Repositories.ImageRepository;
 using DatingAppProject.Repositories.InterestRepository;
+using DatingAppProject.Repositories.NewsRepository;
 using DatingAppProject.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +20,8 @@ public static class ApplicationServiceExtensions {
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IInterestRepository, InterestRepository>();
         services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+        services.AddScoped<IImageRepository, ImageRepository>();
+        services.AddScoped<INewsRepository, NewsRepository>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddSignalR();
         

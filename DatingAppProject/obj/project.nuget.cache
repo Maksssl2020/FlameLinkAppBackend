@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8QSH9mhGYkM=",
+  "dgSpecHash": "9xy8DuNVnT4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\maksy\\RiderProjects\\DatingAppProject\\DatingAppProject\\DatingAppProject.csproj",
+  "projectFilePath": "C:\\Users\\maksy\\RiderProjects\\FlameLinkAppBackend\\DatingAppProject\\DatingAppProject.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\maksy\\.nuget\\packages\\automapper\\14.0.0\\automapper.14.0.0.nupkg.sha512",
     "C:\\Users\\maksy\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
