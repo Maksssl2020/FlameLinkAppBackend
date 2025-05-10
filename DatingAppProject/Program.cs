@@ -1,7 +1,7 @@
 using DatingAppProject.Data;
 using DatingAppProject.Entities;
-using DatingAppProject.Entities.User;
 using DatingAppProject.extensions;
+using DatingAppProject.Helpers;
 using DatingAppProject.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,12 @@ public class Program {
         var app = builder.Build();
 
         app.UseMiddleware<ExceptionMiddleware>();
-        app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:5173"));
+        app.UseCors(x => 
+            x.AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithOrigins("http://localhost:5173", "http://localhost:5174")
+                .AllowCredentials()
+        );
         
         app.UseAuthentication();
         app.UseAuthorization();
@@ -35,6 +40,8 @@ public class Program {
             var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
             await context.Database.MigrateAsync();
             await AppRoleSeed.SeedRolesAsync(roleManager);
+            // await SeedHelper.SeedInterestsAsync(context);
+            // await SeedHelper.SeedUsersAsync(userManager, roleManager,  context);
         }
         catch (Exception e) {
             var logger = services.GetRequiredService<ILogger<Program>>();

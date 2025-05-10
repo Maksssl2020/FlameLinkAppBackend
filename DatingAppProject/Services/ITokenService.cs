@@ -1,5 +1,4 @@
 using DatingAppProject.Entities;
-using DatingAppProject.Entities.User;
 
 namespace DatingAppProject.Services;
 

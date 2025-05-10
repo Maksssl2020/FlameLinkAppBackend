@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace DatingAppProject.Entities.InterestEntity;
+namespace DatingAppProject.Entities;
 
 public class Interest {
 

@@ -11,6 +11,14 @@ public class AuthenticationController(IAuthenticationRepository authenticationRe
 
     [HttpPost("register")]
     public async Task<ActionResult<AuthenticationDto>> Register(RegisterRequestDto registerRequest){
+        if (await authenticationRepository.IsFieldTaken("username", registerRequest.Username)) {
+            return BadRequest("Username already taken.");
+        }
+        
+        if (await authenticationRepository.IsFieldTaken("email", registerRequest.Email)) {
+            return BadRequest("Email already taken.");
+        }
+        
         try {
             var registrationResult = await authenticationRepository.Register(registerRequest);
             return Ok(registrationResult);

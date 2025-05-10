@@ -1,4 +1,3 @@
-using DatingAppProject.Entities.User;
 using Microsoft.AspNetCore.Identity;
 
 namespace DatingAppProject.Entities;

@@ -1,6 +1,6 @@
 using AutoMapper;
 using DatingAppProject.Data;
-using DatingAppProject.Entities.ImageEntity;
+using DatingAppProject.Entities;
 
 namespace DatingAppProject.Repositories.ImageRepository;
 

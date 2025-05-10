@@ -2,7 +2,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using DatingAppProject.Data;
 using DatingAppProject.DTO;
-using DatingAppProject.Entities.InterestEntity;
+using DatingAppProject.Entities;
 using DatingAppProject.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

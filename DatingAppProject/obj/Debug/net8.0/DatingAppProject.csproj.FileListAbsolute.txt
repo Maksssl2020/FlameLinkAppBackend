@@ -303,3 +303,4 @@ C:\Users\maksy\RiderProjects\FlameLinkAppBackend\DatingAppProject\obj\Debug\net8
 C:\Users\maksy\RiderProjects\FlameLinkAppBackend\DatingAppProject\obj\Debug\net8.0\DatingAppProject.pdb
 C:\Users\maksy\RiderProjects\FlameLinkAppBackend\DatingAppProject\obj\Debug\net8.0\DatingAppProject.genruntimeconfig.cache
 C:\Users\maksy\RiderProjects\FlameLinkAppBackend\DatingAppProject\obj\Debug\net8.0\ref\DatingAppProject.dll
+C:\Users\maksy\RiderProjects\FlameLinkAppBackend\DatingAppProject\bin\Debug\net8.0\Bogus.dll

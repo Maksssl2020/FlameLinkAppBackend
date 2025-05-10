@@ -1,4 +1,4 @@
-namespace DatingAppProject.Entities.ImageEntity;
+namespace DatingAppProject.Entities;
 
 public class Image {
     public long Id { get; set; }
