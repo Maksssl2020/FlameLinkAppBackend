@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DatingAppProject")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+423687abfaee3ac2ac544d8b9f25b26eb9168621")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5819af7c5305238e041b6be7f3cfa96b69e75d4")]
 [assembly: System.Reflection.AssemblyProductAttribute("DatingAppProject")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DatingAppProject")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

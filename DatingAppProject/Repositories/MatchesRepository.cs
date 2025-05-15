@@ -26,6 +26,11 @@ public class MatchesRepository(DataContext dataContext, IMapper mapper) : IMatch
                    m.SourceUserId == matchId && m.TargetUserId == userId);
     }
 
+    public async Task<bool> IsUserLiked(long sourceUserId, long targetUserId){
+        return await dataContext.Matches.AnyAsync(m =>
+            m.SourceUserId == sourceUserId && m.TargetUserId == targetUserId);
+    }
+
     public async Task<List<UserDto>> GetMatches(long userId){ 
         var likedByUser = await dataContext.Matches
             .Where(m => m.SourceUserId == userId)

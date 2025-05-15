@@ -37,9 +37,15 @@ public class ForumPostRepository(DataContext dataContext, IMapper mapper, IUserP
     }
 
     public async Task<ForumPostDto?> GetPostById(long postId){
-        return await dataContext.ForumPosts
+        var foundPost = await dataContext.ForumPosts
             .ProjectTo<ForumPostDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(post => post.Id == postId);
+
+        if (foundPost != null) {
+            foundPost.Likes = GetPostLikesCount(postId);
+        }
+        
+        return foundPost;
     }
 
     public async Task<List<ForumPostDto>> GetPostsByUserId(long userId){
@@ -50,9 +56,22 @@ public class ForumPostRepository(DataContext dataContext, IMapper mapper, IUserP
     }
 
     public async Task<List<ForumPostDto>> GetAllPosts(){
-        return await dataContext.ForumPosts
+        var foundPosts = await dataContext.ForumPosts
             .ProjectTo<ForumPostDto>(mapper.ConfigurationProvider)
             .ToListAsync();
+
+        foreach (var post in foundPosts) {
+            post.Likes = GetPostLikesCount(post.Id);
+        }
+        
+        return foundPosts;
+    }
+
+    public Task<bool> IsPostLikedByUser(long postId, long userId){
+        return dataContext.ForumPosts
+            .Where(post => post.Id == postId)
+            .SelectMany(post => post.LikesList)
+            .AnyAsync(like => like.UserId == userId);
     }
 
     public async Task<bool> DeletePost(long postId){
@@ -79,7 +98,35 @@ public class ForumPostRepository(DataContext dataContext, IMapper mapper, IUserP
         return await dataContext.SaveChangesAsync() > 0;
     }
 
+    public Task LikePost(ForumPost forumPost, AppUser user){
+        var foundLike = forumPost.LikesList.FirstOrDefault(like => like.UserId == user.Id);
+
+        if (foundLike != null) {
+            forumPost.LikesList.Remove(foundLike);
+        }
+        else {
+            var newLike = new ForumPostLike
+            {
+                UserId = user.Id,
+                PostId = forumPost.Id,
+                Post = forumPost,
+                User = user,
+            };
+
+            forumPost.LikesList.Add(newLike);
+        }
+
+        return Task.CompletedTask;
+    }
+
     public async Task<bool> SaveAllChanges(){
         return await dataContext.SaveChangesAsync() > 0;
+    }
+    
+    private int GetPostLikesCount(long postId) {
+        return dataContext.ForumPosts
+            .Where(post => post.Id == postId)
+            .SelectMany(post => post.LikesList)
+            .Count();
     }
 }

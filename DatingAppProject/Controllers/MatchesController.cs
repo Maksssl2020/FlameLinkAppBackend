@@ -29,6 +29,12 @@ public class MatchesController(IMatchesRepository matchesRepository, UserManager
         return Ok(isMatch);
     }
     
+    [HttpGet("{sourceUserId:long}/is-like/{targetUserId:long}")]
+    public async Task<ActionResult<bool>> IsLike([FromRoute] long sourceUserId, [FromRoute] long targetUserId){
+        var isLike = await matchesRepository.IsUserLiked(sourceUserId, targetUserId);
+        return Ok(isLike);
+    }
+    
     [HttpPost("{sourceUserId:long}/like/{targetUserId:long}")]
     public async Task<ActionResult> LikeUser([FromRoute] long sourceUserId, [FromRoute] long targetUserId) {
         var foundSourceUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == sourceUserId);

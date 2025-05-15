@@ -25,5 +25,4 @@ public class UserProfile {
     public AppUser ProfileOwner { get; set; } = null!;
     
     public List<Image> Photos { get; set; } = [];
-    public List<Interest> Interests { get; set; } = [];
 }

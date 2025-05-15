@@ -1,3 +1,4 @@
+using DatingAppProject.DTO;
 using DatingAppProject.Entities;
 using DatingAppProject.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,12 @@ namespace DatingAppProject.Controllers;
 [Route("api/v1/dislikes")]
 public class DislikesController(IDislikeRepository dislikeRepository, UserManager<AppUser> userManager) : ControllerBase {
 
+    [HttpGet("{sourceUserId:long}/disliked-users")]
+    public async Task<ActionResult<List<UserDto>>> GetDislikedUsers([FromRoute] long sourceUserId) {
+        var dislikedUsers = await dislikeRepository.GetDislikedUsers(sourceUserId);
+        return Ok(dislikedUsers);
+    }
+    
     [HttpGet("{sourceUserId:long}/is-disliked/{dislikedUserId:long}")]
     public async Task<ActionResult<bool>> IsDisliked([FromRoute] long sourceUserId, [FromRoute] long dislikedUserId){
         var isDisliked = await dislikeRepository.IsDisliked(sourceUserId, dislikedUserId);

@@ -1,4 +1,3 @@
-using AutoMapper;
 using DatingAppProject.DTO;
 using DatingAppProject.Entities;
 using DatingAppProject.extensions;
@@ -32,8 +31,45 @@ public class UsersController(IUserRepository userRepository, UserManager<AppUser
         
         return Ok(foundUser);
     }
+    
+    [Authorize]
+    [HttpPatch("change-account-data")]
+    public async Task<IActionResult> ChangeAccountData([FromForm] UpdateAccountDataRequest updateAccountDataRequest) {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null) {
+            return Unauthorized("User not found.");
+        }
 
-    [HttpPost("like-user/{likedUserId:long}")]
+        if (updateAccountDataRequest.Email != null) {
+            var isEmailTaken = await userRepository.IsEmailTaken(updateAccountDataRequest.Email);
+
+            if (!isEmailTaken) {
+                user.Email = updateAccountDataRequest.Email;
+            }
+            else {
+                return BadRequest($"Email {updateAccountDataRequest.Email} is already taken.");
+            }
+        }
+        
+        if (updateAccountDataRequest.FirstName != null) {
+            user.FirstName = updateAccountDataRequest.FirstName;
+        }
+
+        if (updateAccountDataRequest.LastName != null) {
+            user.LastName = updateAccountDataRequest.LastName;
+        }
+
+        if (updateAccountDataRequest.City != null) {
+            user.City = updateAccountDataRequest.City;
+        }
+
+        if (updateAccountDataRequest.Country != null) {
+            user.Country = updateAccountDataRequest.Country;
+        }
+
+        await userRepository.SaveAllAsync();
+        return Ok("User has been updated.");
+    }
     
     [Authorize]
     [HttpPut("change-password")]

@@ -18,5 +18,5 @@ public class AppUser : IdentityUser<long> {
     public UserProfile UserProfile { get; set; } = null!;
     
     public ICollection<AppUserRole> UserRoles { get; set; } = [];
-    public List<Interest> Interests { get; set; } = [];
+    public ICollection<Interest> Interests { get; set; } = [];
 }

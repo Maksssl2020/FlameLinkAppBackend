@@ -14,7 +14,7 @@ public static class SeedHelper {
     public static async Task SeedInterestsAsync(DataContext dataContext){
         if (await dataContext.Interests.AnyAsync()) return;
 
-        var interests = new[] {
+        var interestNames  = new[] {
             "Music", "Movies", "Sports", "Gaming", "Travel", "Art", "Cooking", "Dancing", "Fitness",
             "Reading", "Photography", "Hiking", "Yoga", "Writing", "Running", "Cycling", "Board Games",
             "Video Games", "Fashion", "Technology", "Theatre", "Volunteering", "Swimming", "Pets",
@@ -24,16 +24,9 @@ public static class SeedHelper {
             "Travel Blogging", "Tattoo Art", "DIY Projects"
         };
 
-        foreach (var interestName in interests) {
 
-            if (await dataContext.Interests.AnyAsync(interest => interest.InterestName == interestName)) continue; 
-            
-            {
-                var interest = new Interest { InterestName = interestName };
-                await dataContext.Interests.AddAsync(interest);
-            }
-        }
-
+        var interests = interestNames.Select(name => new Interest { InterestName = name });
+        await dataContext.Interests.AddRangeAsync(interests);
         await dataContext.SaveChangesAsync();
     }
     
@@ -68,7 +61,7 @@ public static class SeedHelper {
             .RuleFor(u => u.Preference, f => f.PickRandom(preferences))
             .RuleFor(u => u.DateOfBirth, f => f.Date.Past(50, DateTime.Today.AddYears(-18)).ToString("yyyy-MM-dd"))
             .RuleFor(u => u.LookingFor, f => f.PickRandom(lookingForOptions))
-            .RuleFor(u => u.Interests, f => f.PickRandom(interests, 10).ToList());
+            .RuleFor(u => u.Interests, f => f.PickRandom(interests, Random.Shared.Next(3, 11)).ToList());
 
         var fakeUsers = faker.Generate(10);
         var client = new HttpClient();
@@ -86,7 +79,6 @@ public static class SeedHelper {
                 DateOfBirth = DateOnly.Parse(fake.DateOfBirth)
             };
 
-            Console.WriteLine($"Creating user {fake.Username}...");
             var response = await client.GetStringAsync("https://randomuser.me/api/");
             var json = JsonDocument.Parse(response);
             var photoUrl = json.RootElement
@@ -97,6 +89,7 @@ public static class SeedHelper {
             var imageBytes = await client.GetByteArrayAsync(photoUrl);
             
             var result = await userManager.CreateAsync(user, fake.Password);
+            
             if (!result.Succeeded) {
                 Console.WriteLine($"❌ Failed to create user {user.UserName}:");
                 foreach (var error in result.Errors) {
@@ -107,6 +100,23 @@ public static class SeedHelper {
 
             await userManager.AddToRoleAsync(user, "User");
             
+            var trackedUser = await dataContext.Users
+                .Include(u => u.Interests)
+                .Include(u => u.UserProfile)
+                .FirstAsync(u => u.UserName == user.UserName);
+
+            List<Interest> createdInterests = [];
+            
+            foreach (var fakeInterest in fake.Interests) {
+                var foundInterest = await dataContext.Interests.FirstOrDefaultAsync(i => i.InterestName == fakeInterest);
+                
+                if (foundInterest != null) {
+                    createdInterests.Add(foundInterest);
+                }
+                
+                
+            }
+            
             var profile = new UserProfile {
                 DisplayName = $"{user.FirstName} {user.LastName}",
                 Gender = user.Gender,
@@ -115,22 +125,13 @@ public static class SeedHelper {
                 Country = user.Country,
                 Age = CalculateAge.CalculateAgeFromDob(user.DateOfBirth),
                 LookingFor = fake.LookingFor,
-                Bio = "",
-                ProfileOwner = user,
-                Interests = [],
+                Bio = new Faker().Lorem.Sentences(3),
+                ProfileOwner = trackedUser,
                 Photos = [],
             };
-  
             
-            foreach (var interestName in fake.Interests.Distinct()) {
-                var interest = await dataContext.Interests
-                    .FirstOrDefaultAsync(i => i.InterestName == interestName);
-
-                if (interest != null)
-                    profile.Interests.Add(interest);
-            }
-
             await dataContext.UserProfiles.AddAsync(profile);
+            
             
             var mainPhoto = new Image {ImageData = imageBytes};
             await dataContext.Images.AddAsync(mainPhoto);
@@ -138,7 +139,11 @@ public static class SeedHelper {
             
             profile.MainPhoto = mainPhoto;
             profile.MainPhotoId = mainPhoto.Id;
-            user.UserProfile = profile;
+            
+            trackedUser.UserProfile = profile;
+            trackedUser.ProfileId = profile.Id;
+            
+            trackedUser.Interests = createdInterests;
         }
         
         await dataContext.SaveChangesAsync();

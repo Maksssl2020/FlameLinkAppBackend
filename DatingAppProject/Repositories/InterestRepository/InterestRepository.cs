@@ -10,6 +10,25 @@ using Microsoft.IdentityModel.Tokens;
 namespace DatingAppProject.Repositories.InterestRepository;
 
 public class InterestRepository(DataContext dataContext, IMapper mapper) : IInterestRepository {
+    public async Task<Interest?> FindByName(string name) {
+        return await dataContext.Interests
+            .Where(i => i.InterestName.ToUpper() == name.ToUpper())
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<Interest>> GetAllByNames(List<string> names) {
+        List<Interest> interests = [];
+        
+        foreach (var name in names) {
+            var foundInterest = await FindByName(name);
+            if (foundInterest != null) {
+                interests.Add(foundInterest);
+            }
+        }
+        
+        return interests;
+    }
+
     public async Task SaveInterest(InterestRequestDto interestRequest){
 
         if (interestRequest.InterestName.IsNullOrEmpty()) {

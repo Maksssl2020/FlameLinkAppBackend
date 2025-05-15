@@ -6,5 +6,7 @@ namespace DatingAppProject.Repositories.UserRepository;
 public interface IUserRepository {
     Task<UserDto?> GetUserById(long id);
     Task<PaginationList<UserDto>> GetAllMatchingUsers(UserParams userParams);
+    Task<bool> IsEmailTaken(string emailValue);
+
     Task<bool> SaveAllAsync();
 }

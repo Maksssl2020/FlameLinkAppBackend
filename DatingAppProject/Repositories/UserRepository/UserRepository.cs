@@ -39,11 +39,14 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
             .Where(user => user.UserName != userParams.UserUsername &&
                            !likedUserIds.Contains(user.Id) &&
                            !dislikedUserIds.Contains(user.Id))
-            .AsQueryable();        
-        
-        // if (!string.IsNullOrEmpty(currentUser.Preference)) {
-        //     users = users.Where(user => user.Gender == currentUser.Preference);
-        // }
+            .AsQueryable();
+
+
+        users = currentUser.Preference switch {
+            "Males" => users.Where(user => user.Gender == "Male"),
+            "Females" => users.Where(user => user.Gender == "Female"),
+            _ => users
+        };
 
         var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
         var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
@@ -55,6 +58,10 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
             userParams.PageNumber, 
             userParams.PageSize
             );
+    }
+
+    public async Task<bool> IsEmailTaken(string emailValue) {
+        return await dataContext.Users.AnyAsync(user => user.Email == emailValue);
     }
 
     public async Task<bool> SaveAllAsync(){

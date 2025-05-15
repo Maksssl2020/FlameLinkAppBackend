@@ -1,12 +1,14 @@
+using DatingAppProject.Data;
 using DatingAppProject.DTO;
 using DatingAppProject.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppProject.Controllers;
 
 [ApiController]
 [Route("api/v1/forum-posts")]
-public class ForumPostsController(IForumPostRepository forumPostRepository) : ControllerBase {
+public class ForumPostsController(IForumPostRepository forumPostRepository, DataContext dataContext) : ControllerBase {
     
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ForumPostDto>>> GetAllPosts() {
@@ -23,11 +25,41 @@ public class ForumPostsController(IForumPostRepository forumPostRepository) : Co
         return Ok(post);
     }
     
+    [HttpGet("post-likes/is-liked/{postId:long}/{userId:long}")]
+    public async Task<ActionResult<bool>> IsPostLikedByUser(long postId, long userId) {
+       var isLiked = await forumPostRepository.IsPostLikedByUser(postId, userId);
+       return Ok(isLiked);
+    }
+    
     [HttpPost]
     public async Task<ActionResult> CreatePost([FromBody] ForumPostRequestDto forumPostRequest) {
         await forumPostRepository.CreatePost(forumPostRequest);
         if (!await forumPostRepository.SaveAllChanges()) {
             return BadRequest("Failed to create post.");
+        }
+        
+        return NoContent();
+    }
+    
+    [HttpPost("post-likes/{postId:long}/{userId:long}")]
+    public async Task<ActionResult> LikeOrUnlikePost(long postId, long userId) {
+        var post = await dataContext.ForumPosts
+            .Include(p => p.LikesList)
+            .FirstOrDefaultAsync(p => p.Id == postId);
+
+        if (post == null) {
+            return NotFound("Post not found.");
+        }
+        
+        var user = await dataContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null) {
+            return NotFound("User not found.");
+        }
+        
+        await forumPostRepository.LikePost(post, user);
+        
+        if (!await forumPostRepository.SaveAllChanges()) {
+            return BadRequest("Failed to like post.");
         }
         
         return NoContent();

@@ -21,21 +21,30 @@ public class UserProfileRepository(DataContext dataContext, IMapper mapper) : IU
     }
 
     public async Task<UserProfileDto?> GetProfileDtoByOwnerId(long ownerId) {
-        return await dataContext.UserProfiles
+        var interests = await dataContext.Interests
+            .Where(i => i.Users.Any(u => u.Id == ownerId))
+            .ProjectTo<InterestDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        var userProfile = await dataContext.UserProfiles
             .Include(up => up.Photos)
             .Include(up => up.MainPhoto)
-            .Include(up => up.Interests)
             .Include(up => up.ProfileOwner)
             .Where(up => up.ProfileOwnerId == ownerId)
             .ProjectTo<UserProfileDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
+        
+        if (userProfile != null) {
+            userProfile.Interests = interests;
+        }
+        
+        return userProfile;
     }
 
     public async Task<UserProfile?> GetProfileByOwnerId(long ownerId){
         return await dataContext.UserProfiles
             .Include(up => up.Photos)
             .Include(up => up.MainPhoto)
-            .Include(up => up.Interests)
             .Include(up => up.ProfileOwner)
             .Where(up => up.ProfileOwnerId == ownerId)
             .FirstOrDefaultAsync();

@@ -29,6 +29,8 @@ public static class ApplicationServiceExtensions {
         services.AddScoped<IUserReviewRepository, UserReviewRepository>();
         services.AddScoped<IMatchesRepository, MatchesRepository>();
         services.AddScoped<IDislikeRepository, DislikeRepository>();
+        services.AddScoped<IMessagesRepository, MessagesRepository>();
+        services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         services.AddSignalR();
         

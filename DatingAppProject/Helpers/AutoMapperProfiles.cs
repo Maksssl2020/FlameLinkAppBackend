@@ -19,5 +19,6 @@ public class AutoMapperProfiles : Profile {
             .ForMember(dest => dest.Age, opt => opt.MapFrom(src => CalculateAge.CalculateAgeFromDob(src.DateOfBirth)));
         CreateMap<UserProfile, UserProfileDto>();
         CreateMap<ForumPost, ForumPostDto>();
+        CreateMap<Message, MessageDto>();
     }
 }

@@ -1,5 +1,7 @@
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DatingAppProject.Data;
+using DatingAppProject.DTO;
 using DatingAppProject.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,5 +29,13 @@ public class DislikeRepository(DataContext dataContext, IMapper mapper) : IDisli
     public async Task<Dislike?> GetDislike(long sourceUserId, long targetUserId){
         return await dataContext.Dislikes
             .FirstOrDefaultAsync(d => d.SourceUserId == sourceUserId && d.TargetUserId == targetUserId);
+    }
+
+    public Task<List<UserDto>> GetDislikedUsers(long userId){
+        return dataContext.Dislikes
+            .Where(d => d.SourceUserId == userId)
+            .Select(d => d.TargetUser)
+            .ProjectTo<UserDto>(mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }
