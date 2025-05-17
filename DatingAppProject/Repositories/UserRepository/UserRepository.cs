@@ -2,12 +2,14 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using DatingAppProject.Data;
 using DatingAppProject.DTO;
+using DatingAppProject.Entities;
 using DatingAppProject.Helpers;
+using DatingAppProject.Repositories.InterestRepository;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppProject.Repositories.UserRepository;
 
-public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepository {
+public class UserRepository(DataContext dataContext, IInterestRepository interestRepository, IMapper mapper) : IUserRepository {
     public async Task<UserDto?> GetUserById(long id){
         return await dataContext.Users
             .Where(user => user.Id == id)
@@ -47,6 +49,20 @@ public class UserRepository(DataContext dataContext, IMapper mapper) : IUserRepo
             "Females" => users.Where(user => user.Gender == "Female"),
             _ => users
         };
+
+        users = userParams.UserParamsImagesOptions switch {
+            UserParamsImagesOptions.With => users.Where(u =>
+                u.UserProfile.MainPhoto != null || u.UserProfile.Photos.Count > 0),
+            UserParamsImagesOptions.Without => users.Where(u =>
+                u.UserProfile.MainPhoto == null && u.UserProfile.Photos.Count == 0),
+            _ => users
+        };
+
+        var foundInterests = await interestRepository.GetAllByNames(userParams.Interests);
+        if (foundInterests.Count > 0) {
+            var foundInterestNames = foundInterests.Select(i => i.InterestName).ToList();
+            users = users.Where(u => u.Interests.Any(ui => foundInterestNames.Contains(ui.InterestName)));
+        }
 
         var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
         var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));

@@ -3,6 +3,7 @@ using AutoMapper;
 using DatingAppProject.DTO;
 using DatingAppProject.Entities;
 using DatingAppProject.Exceptions;
+using DatingAppProject.Repositories.InterestRepository;
 using DatingAppProject.Repositories.ProfileRepository;
 using DatingAppProject.Services;
 using Microsoft.AspNetCore.Identity;
@@ -10,10 +11,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppProject.Repositories.Authentication;
 
-public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenService tokenService, IUserProfileRepository userProfileRepository, IMapper mapper) : IAuthenticationRepository {
+public class AuthenticationRepository(IInterestRepository interestRepository, UserManager<AppUser> userManager, ITokenService tokenService, IUserProfileRepository userProfileRepository, IMapper mapper) : IAuthenticationRepository {
     
     public async Task<AuthenticationDto> Register(RegisterRequestDto registerRequest){
         var appUser = mapper.Map<AppUser>(registerRequest);
+        
+        if (registerRequest.Interests.Count != 0) {
+            var foundInterests = await interestRepository.GetAllByNames(registerRequest.Interests);
+            appUser.Interests = foundInterests;
+        }
+
+        
         var result = await userManager.CreateAsync(appUser, registerRequest.Password);
         
         if (!result.Succeeded) {
@@ -28,6 +36,7 @@ public class AuthenticationRepository(UserManager<AppUser> userManager, ITokenSe
         }
         
         await userProfileRepository.SaveProfile(appUser, registerRequest.LookingFor);
+        
         if (await userProfileRepository.SaveAll()) {
             return await Login(new LoginRequestDto {
                 Username = registerRequest.Username,

@@ -1,12 +1,18 @@
 using AutoMapper;
 using DatingAppProject.Data;
 using DatingAppProject.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppProject.Repositories.ImageRepository;
 
 public class ImageRepository(DataContext dataContext) : IImageRepository {
+    public async Task<Image?> GetImageByIdAsync(long imageId) {
+        return await dataContext.Images
+            .Where(i => i.Id == imageId)
+            .FirstOrDefaultAsync();
+    }
 
-    public async Task<Image> SaveImage(IFormFile file){
+    public async Task<Image> SaveImageAsync(IFormFile file){
         using var memoryStream = new MemoryStream();
         await file.CopyToAsync(memoryStream);
 
@@ -20,7 +26,7 @@ public class ImageRepository(DataContext dataContext) : IImageRepository {
         return image;
     }
 
-    public async Task<List<Image>> SaveImages(IFormFile[] files) {
+    public async Task<List<Image>> SaveImagesAsync(IFormFile[] files) {
         List<Image> images = [];
         using var memoryStream = new MemoryStream();
 
@@ -37,5 +43,13 @@ public class ImageRepository(DataContext dataContext) : IImageRepository {
         await dataContext.SaveChangesAsync();
 
         return images;
+    }
+
+    public void RemoveImage(Image image) {
+        dataContext.Images.Remove(image);
+    }
+
+    public async Task<bool> SaveChangesAsync() {
+        return await dataContext.SaveChangesAsync() > 0;
     }
 }

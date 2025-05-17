@@ -27,7 +27,7 @@ public class UserProfilesController(IUserProfileRepository userProfileRepository
             return BadRequest("User's profile does not exist.");
         }
 
-        var savedImage = await imageRepository.SaveImage(file);
+        var savedImage = await imageRepository.SaveImageAsync(file);
         userProfile.MainPhoto = savedImage;
         userProfile.MainPhotoId = savedImage.Id;
 
@@ -49,7 +49,7 @@ public class UserProfilesController(IUserProfileRepository userProfileRepository
             return BadRequest("You reached the maximum number of photos in profile.");
         }
         
-        var savedImage = await imageRepository.SaveImage(file);
+        var savedImage = await imageRepository.SaveImageAsync(file);
         userProfile.Photos.Add(savedImage);
         
         if (await userProfileRepository.SaveAll()) {
@@ -88,6 +88,23 @@ public class UserProfilesController(IUserProfileRepository userProfileRepository
         }
 
         await userProfileRepository.SaveAll();
+        return NoContent();
+    }
+
+    [HttpDelete("delete-profile-image/{imageId:long}")]
+    public async Task<ActionResult> DeleteProfileImage([FromRoute] long imageId) {
+        var foundImage = await imageRepository.GetImageByIdAsync(imageId);
+        
+        if (foundImage == null) {
+            return BadRequest("Image not found.");
+        }
+        
+        imageRepository.RemoveImage(foundImage);
+
+        if (!await imageRepository.SaveChangesAsync()) {
+            return BadRequest("Failed to delete profile image.");
+        }
+        
         return NoContent();
     }
  }
